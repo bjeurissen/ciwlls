@@ -10,10 +10,10 @@ classdef DTI
     %
     % with
     %
-    % grad: n_g × 4 (gradient direction + b-value, preferrably expressed in ms/um^2)
-    % y: n_x × n_y × n_z × n_g (DW image series)
-    % mask : n_x × n_y × n_z (boolean processing mask)
-    % x: n_x × n_y × n_z × 7 (DTI parameters)
+    % grad: n_g Ã— 4 (gradient direction + b-value, preferrably expressed in ms/um^2)
+    % y: n_x Ã— n_y Ã— n_z Ã— n_g (DW image series)
+    % mask : n_x Ã— n_y Ã— n_z (boolean processing mask)
+    % x: n_x Ã— n_y Ã— n_z Ã— 7 (DTI parameters)
     % m: struct with scalar DTI metrics
     %
     %
@@ -85,12 +85,6 @@ classdef DTI
                     end
                 end
                 
-                
-                
-                
-                
-                
-                
                 if size(Aneq, 1) > 0
                     bneq = zeros(size(Aneq, 1), 1);
                 end
@@ -139,8 +133,7 @@ classdef DTI
             y = exp(obj.A*x);
             if exist('mask','var'); y = Volumes.unvec(y, mask); end
         end
-        
-        
+                
         function [f, g] = ssd(obj, x, y)
             if nargin == 1
                 f = size(obj.A,2);
