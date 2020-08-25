@@ -94,7 +94,10 @@ classdef DKI < DTI
                     case 'wlls'
                         obj.estimator = LLS(obj.A, Aneq, bneq, [], []);
                     case 'nls'
+                        obj.init_estimator = LLS(obj.A, [], [], [], []);
                         obj.estimator = NLS(@obj.ssd, Aneq, bneq, [], []);
+                    otherwise
+                        error('estimator not supported!')
                 end
             end
         end

@@ -52,6 +52,7 @@ classdef DTI
         iter
         estimatorname
         estimator
+        init_estimator
     end
     
     methods (Access = public, Static = false)
@@ -95,21 +96,25 @@ classdef DTI
                     case 'wlls'
                         obj.estimator = LLS(obj.A, Aneq, bneq, [], []);
                     case 'nls'
+                        obj.init_estimator = LLS(obj.A, [], [], [], []);
                         obj.estimator = NLS(@obj.ssd, Aneq, bneq, [], []);
+                    otherwise
+                        error('estimator not supported!')
                 end
             end
         end
         
         function x = solve(obj, y, x0)
-            fprintf(1, 'Performing model fitting ...\n');
-            if ndims(y) ~= 2; [y, mask] = Volumes.vec(y); end %#ok<*ISMAT>
+            if ndims(y) ~= 2; [y, mask] = Volumes.vec(y); if nargin > 2; x0 = Volumes.vec(x0,mask); end; end %#ok<*ISMAT>
             f = 1000/median(y(:));
             y = y.*f;
             y(y<eps) = eps;
             switch obj.estimatorname
                 case 'lls'
+                    fprintf(1, 'Performing LLS fitting ...\n');
                     x = obj.estimator.solve(log(y));
                 case 'wlls'
+                    fprintf(1, 'Performing WLLS fitting ...\n');
                     logy = log(y);
                     fprintf(1, 'Initial weighting...\n');
                     x = obj.estimator.solve(logy, y);
@@ -118,10 +123,17 @@ classdef DTI
                         x = obj.estimator.solve(logy, obj.predict(x));
                     end
                 case 'nls'
+                    fprintf(1, 'Performing NLS fitting ...\n');
                     if nargin > 2
+                        x0(1, :) = x0(1, :) + log(f);
                         x = obj.estimator.solve(y, x0);
                     else
-                        x = obj.estimator.solve(y);
+                        fprintf(1, 'Initial LLS fitting ...\n');
+                        x0 = obj.init_estimator.solve(log(y));
+                        fprintf(1, 'Final NLS fitting ...\n');
+                        warning('off','MATLAB:nearlySingularMatrix');
+                        x = obj.estimator.solve(y, x0);
+                        warning('on','MATLAB:nearlySingularMatrix');
                     end
             end
             x(1, :) = x(1, :) - log(f);

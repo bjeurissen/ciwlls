@@ -51,7 +51,7 @@ classdef LLS
             obj.beq = beq;
             if ~isempty(Aneq) || ~isempty(Aeq)
                 obj.H = obj.A'*obj.A;
-                obj.optimopt = optimoptions('quadprog','Display','none','LinearSolver','sparse','MaxIterations',100,'OptimalityTolerance',1e-10,'StepTolerance',1e-10,'ConstraintTolerance',1e-10);
+                obj.optimopt = optimoptions('quadprog','Display','none','LinearSolver','sparse','MaxIterations',400,'OptimalityTolerance',1e-8,'StepTolerance',1e-12,'ConstraintTolerance',1e-8);
             end
         end
         

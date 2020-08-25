@@ -49,9 +49,9 @@ classdef NLS
             obj.Aeq = Aeq;
             obj.beq = beq;
             if isempty(Aneq) && isempty(Aeq)
-                obj.optimopt = optimoptions('fminunc','Display','none','SpecifyObjectiveGradient',true,'MaxIterations',100,'MaxFunctionEvaluations',inf,'OptimalityTolerance',1e-10,'StepTolerance',1e-10);
+                obj.optimopt = optimoptions('fminunc','Display','none','SpecifyObjectiveGradient',true,'MaxIterations',400,'MaxFunctionEvaluations',inf,'OptimalityTolerance',1e-8,'StepTolerance',1e-12);
             else
-                obj.optimopt = optimoptions('fmincon','Display','none','SpecifyObjectiveGradient',true,'MaxIterations',100,'MaxFunctionEvaluations',inf,'OptimalityTolerance',1e-10,'StepTolerance',1e-10,'ConstraintTolerance',1e-10);
+                obj.optimopt = optimoptions('fmincon','Display','none','SpecifyObjectiveGradient',true,'MaxIterations',400,'MaxFunctionEvaluations',inf,'OptimalityTolerance',1e-8,'StepTolerance',1e-12,'ConstraintTolerance',1e-8);
             end
         end
         
