@@ -10,10 +10,10 @@ classdef QTI < DTI
     %
     % with
     %
-    % grad: n_g × 5 (gradient direction + b-value + b-delta, preferrably expressed in ms/um^2)
-    % y: n_x × n_y × n_z × n_g (DW image series)
-    % mask : n_x × n_y × n_z (boolean processing mask)
-    % x: n_x × n_y × n_z × 28 (QTI parameters)
+    % grad: n_g Ã— 5 (gradient direction + b-value + b-delta, preferrably expressed in ms/um^2)
+    % y: n_x Ã— n_y Ã— n_z Ã— n_g (DW image series)
+    % mask : n_x Ã— n_y Ã— n_z (boolean processing mask)
+    % x: n_x Ã— n_y Ã— n_z Ã— 28 (QTI parameters)
     % m: struct with scalar QTI metrics
     %
     %
@@ -192,7 +192,7 @@ classdef QTI < DTI
             
             metrics.s_ = S_I';
             metrics.s_a = S_A';
-                        if exist('mask','var')
+            if exist('mask','var')
                 f = fieldnames(metrics);
                 for i = 1:size(f,1)
                     fn = f{i};
