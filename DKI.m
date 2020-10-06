@@ -54,7 +54,7 @@ classdef DKI < DTI
                 p = inputParser;
                 p.addOptional('estimator', 'wlls');
                 p.addOptional('iter', 2);
-                p.addOptional('constr', [1 0 1]);
+                p.addOptional('constr', [0 1 1]);
                 p.addOptional('constr_dirs', 100);
                 p.parse(varargin{:});
                 
@@ -73,13 +73,13 @@ classdef DKI < DTI
                 bneq = [];
                 if exist('constr', 'var') && any(constr)
                     dirs = Directions.get(n);
-                    if constr(1)
+                    if constr(1) % D >= 0
                         Aneq = [Aneq; [zeros(n, 1) DTI.grad2A(dirs) zeros(n, 15)]];
                     end
-                    if constr(2)
+                    if constr(2) % D^2*K >= 0
                         Aneq = [Aneq; [zeros(n, 7) -6*DKI.grad2A(dirs)]];
                     end
-                    if constr(3)
+                    if constr(3) % -D + (b/3)*D^2*K <= 0
                         Aneq = [Aneq; [zeros(n, 1) DTI.grad2A(dirs) (max(grad(:, 4))/3)*6*DKI.grad2A(dirs)]];
                     end
                 end
