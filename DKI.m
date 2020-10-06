@@ -54,7 +54,7 @@ classdef DKI < DTI
                 p = inputParser;
                 p.addOptional('estimator', 'wlls');
                 p.addOptional('iter', 2);
-                p.addOptional('constr', [1 0 1]);
+                p.addOptional('constr', [0 1 1]);
                 p.addOptional('constr_dirs', 100);
                 p.parse(varargin{:});
                 
@@ -73,16 +73,15 @@ classdef DKI < DTI
                 bneq = [];
                 if exist('constr', 'var') && any(constr)
                     dirs = Directions.get(n);
-                    if constr(1)
-                        Aneq = [Aneq; -[zeros(n, 1) prod(reshape(dirs(:,DTI.ind()),[],6,2),3)*diag(DTI.cnt()) zeros(n, 15)]];
+                    if constr(1) % D >= 0
+                        Aneq = [Aneq; [zeros(n, 1) DTI.grad2A(dirs) zeros(n, 15)]];
                     end
-                    if constr(2)
-                        Aneq = [Aneq; -[zeros(n, 7) prod(reshape(dirs(:, DKI.ind()), [], 15, 4), 3)*diag(DKI.cnt())]];
+                    if constr(2) % D^2*K >= 0
+                        Aneq = [Aneq; [zeros(n, 7) -6*DKI.grad2A(dirs)]];
                     end
-                    if constr(3)
-                        Aneq = [Aneq; -[zeros(n, 1) 3/max(grad(:, 4))*prod(reshape(dirs(:,DTI.ind()),[],6,2),3)*diag(DTI.cnt()) -(prod(reshape(dirs(:,DKI.ind()),[],15,4),3))*diag(DKI.cnt())]];
+                    if constr(3) % -D + (b/3)*D^2*K <= 0
+                        Aneq = [Aneq; [zeros(n, 1) DTI.grad2A(dirs) (max(grad(:, 4))/3)*6*DKI.grad2A(dirs)]];
                     end
-                    
                 end
                 if size(Aneq, 1) > 0
                     bneq = zeros(size(Aneq, 1), 1);
@@ -105,8 +104,6 @@ classdef DKI < DTI
     
     methods (Access = private, Static = true)
         function [ak,rk,mk] = armk(x)
-            D_apprSq = 1./mean(x([2 5 7],:),1).^2;
-            x(8:22,:) = x(8:22,:) .* D_apprSq;
             ak = zeros(1,size(x,2));
             rk = zeros(1,size(x,2));
             mk = zeros(1,size(x,2));
@@ -120,9 +117,8 @@ classdef DKI < DTI
         
         function akc = akc(x, dir)
             adc = DTI.adc(x, dir);
-            md = mean(x([2 5 7],:),1);
-            akc = (prod(reshape(dir(:,DKI.ind()),[],15,4),3))*diag(DKI.cnt())*x(8:22, :);
-            akc = (akc .* repmat(md.^2, [size(adc, 1), 1]))./(adc.^2);
+            akc = 6*DKI.grad2A(dir)*x(8:22, :);
+            akc = akc./adc.^2;
         end
     end
     
@@ -136,6 +132,9 @@ classdef DKI < DTI
         end
         
         function A = grad2A(grad)
+            if size(grad,2) < 4
+                grad(:,4) = 1;
+            end
             bsqd6 = (grad(:, 4).^2)/6;
             A = (bsqd6 .* prod(reshape(grad(:, DKI.ind()), [], 15, 4), 3))*diag(DKI.cnt());
         end
