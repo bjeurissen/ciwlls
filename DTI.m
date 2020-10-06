@@ -82,7 +82,7 @@ classdef DTI
                 if exist('constr', 'var') && any(constr)
                     dirs = Directions.get(n);
                     if constr(1)
-                        Aneq = [Aneq; -[zeros(n, 1), prod(reshape(dirs(:,DTI.ind()),[],6,2),3)*diag(DTI.cnt())]];
+                        Aneq = [Aneq; [zeros(n, 1) DTI.grad2A(dirs)]];
                     end
                 end
                 
@@ -196,6 +196,9 @@ classdef DTI
         end
         
         function A = grad2A(grad)
+            if size(grad,2) < 4
+                grad(:,4) = 1;
+            end
             A = -(grad(:, 4)).*prod(reshape(grad(:,DTI.ind()),[],6,2),3)*diag(DTI.cnt());
         end
         
@@ -215,7 +218,7 @@ classdef DTI
         end
         
         function adc = adc(x, dir)
-            adc = prod(reshape(dir(:,DTI.ind()),[],6,2),3)*diag(DTI.cnt())*x(2:7,:);
+            adc = -DTI.grad2A(dir)*x(2:7,:);
         end
         
         function metrics = metrics(x)
