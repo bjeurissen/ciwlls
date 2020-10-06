@@ -77,7 +77,7 @@ classdef DKI < DTI
                         Aneq = [Aneq; [zeros(n, 1) DTI.grad2A(dirs) zeros(n, 15)]];
                     end
                     if constr(2)
-                        Aneq = [Aneq; [zeros(n, 7) -DKI.grad2A(dirs)]];
+                        Aneq = [Aneq; [zeros(n, 7) -6*DKI.grad2A(dirs)]];
                     end
                     if constr(3)
                         Aneq = [Aneq; [zeros(n, 1) DTI.grad2A(dirs) (max(grad(:, 4))/3)*6*DKI.grad2A(dirs)]];
