@@ -53,6 +53,7 @@ classdef QTI < DTI
                 fprintf(1, 'Setting up QTI model...\n');
                 p = inputParser;
                 p.addOptional('estimator', 'wlls');
+                p.addOptional('init_weight','data');
                 p.addOptional('iter', 2);
                 p.addOptional('constr', [0 0 1 1 1]);
                 p.addOptional('constr_dirs', 100);
