@@ -61,6 +61,7 @@ classdef DKI < DTI
                 
                 obj.estimatorname = p.Results.estimator;
                 if strcmp(obj.estimatorname, 'wlls')
+                    obj.init_weight = p.Results.init_weight;
                     obj.iter = p.Results.iter;
                 end
                 constr = p.Results.constr;
