@@ -10,10 +10,10 @@ classdef DKI < DTI
     %
     % with
     %
-    % grad: n_g × 4 (gradient direction + b-value, preferrably expressed in ms/um^2)
-    % y: n_x × n_y × n_z × n_g (DW image series)
-    % mask : n_x × n_y × n_z (boolean processing mask)
-    % x: n_x × n_y × n_z × 22 (DKI parameters)
+    % grad: n_g Ã— 4 (gradient direction + b-value, preferrably expressed in ms/um^2)
+    % y: n_x Ã— n_y Ã— n_z Ã— n_g (DW image series)
+    % mask : n_x Ã— n_y Ã— n_z (boolean processing mask)
+    % x: n_x Ã— n_y Ã— n_z Ã— 22 (DKI parameters)
     % m: struct with scalar DKI metrics
     %
     %
@@ -53,6 +53,7 @@ classdef DKI < DTI
                 fprintf(1, 'Setting up DKI model...\n');
                 p = inputParser;
                 p.addOptional('estimator', 'wlls');
+                p.addOptional('init_weight','data');
                 p.addOptional('iter', 2);
                 p.addOptional('constr', [0 1 1]);
                 p.addOptional('constr_dirs', 100);
