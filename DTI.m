@@ -52,6 +52,7 @@ classdef DTI
         iter
         estimatorname
         estimator
+        init_weight
         init_estimator
     end
     
@@ -61,6 +62,7 @@ classdef DTI
                 fprintf(1, 'Setting up DTI model ...\n');
                 p = inputParser;
                 p.addOptional('estimator', 'wlls');
+                p.addOptional('init_estimator', 'lls');
                 p.addOptional('init_weight','data');
                 p.addOptional('iter', 2);
                 p.addOptional('constr', 1);
@@ -68,6 +70,8 @@ classdef DTI
                 p.parse(varargin{:});
                 
                 obj.estimatorname = p.Results.estimator;
+                obj.init_estimator = p.Results.init_estimator;
+                
                 if strcmp(obj.estimatorname, 'wlls')
                     obj.init_weight = p.Results.init_weight;
                     obj.iter = p.Results.iter;
