@@ -4,7 +4,7 @@ clear all; close all; clc
 [y,vox,v2w,grad] = MRtrix.readToMatlab('dwi.mif');
 y = double(y); % dwi data, make sure it is double
 grad = double(grad); % gradient directions and b-value
-grad(:,4) = grad(:,4)%/1000; % express b-value in ms/um^2 for better conditioning
+grad(:,4) = grad(:,4)/1000; % express b-value in ms/um^2 for better conditioning
 mask = MRtrix.readToMatlab('mask.mif'); % logical processing mask
 
 %% smoothing image prior to fit can improve QTI fit

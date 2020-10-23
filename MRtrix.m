@@ -2,7 +2,7 @@ classdef MRtrix
     % Written by Ben Jeurissen, Visionlab, University of Antwerp
     % and the MRtrix developers
     %
-
+    
     methods (Access=public,Static=true)
         function image = read(filename)
             image.comments = {};
@@ -72,8 +72,8 @@ classdef MRtrix
             
             if ~isfield (image, 'dim') || ~exist ('file') || ...
                     ~isfield (image, 'layout') || ~isfield (image, 'datatype')
-                disp ('critical entries missing in header - not reading data')
-                return
+            disp ('critical entries missing in header - not reading data')
+            return
             end
             
             layout = MRtrix.split_strings(image.layout, ',');
