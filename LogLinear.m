@@ -123,9 +123,7 @@ classdef (Abstract) LogLinear
                         fprintf(1, 'Initial LLS fitting ...\n');
                         x0 = obj.init_estimator.solve(log(y));
                         fprintf(1, 'Final NLS fitting ...\n');
-                        warning('off','MATLAB:nearlySingularMatrix');
                         x = obj.estimator.solve(y, x0);
-                        warning('on','MATLAB:nearlySingularMatrix');
                     end
             end
             x(1, :) = x(1, :) - log(f);
