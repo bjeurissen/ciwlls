@@ -1,19 +1,19 @@
-classdef DTI < Model
+classdef T2 < Model
     % Authors: Ben Jeurissen (ben.jeurissen@uantwerpen.be), Jan Morez (jan.morez@uantwerpen.be)
     %
     % Basic usage:
     %
-    % model = DTI(grad);
+    % model = T2(te);
     % y = Volumes.mask(y,mask);
     % x = model.solve(y);
     % m = model.metrics(x);
     %
     % with
     %
-    % grad: n_w × 4 (gradient direction + b-value, preferrably expressed in ms/um^2)
+    % te: n_w × 1 (echo times, preferrably expressed in)
     % y: n_x × n_y × n_z × n_w (weighted image series)
     % mask : n_x × n_y × n_z (boolean processing mask)
-    % x: n_x × n_y × n_z × 7 (model parameters)
+    % x: n_x × n_y × n_z × 2 (model parameters)
     % m: struct with scalar metrics
     %
     %
@@ -48,28 +48,24 @@ classdef DTI < Model
     %
     
     methods (Access = public, Static = false)
-        function obj = DTI(grad, varargin)
-            fprintf(1, 'Setting up DTI model ...\n');
+        function obj = T2(te, varargin)
+            fprintf(1, 'Setting up T2 model ...\n');
             
-            % parse DTI specific options
+            % parse T2 specific options
             p = inputParser;
             p.addOptional('constr', 1);
-            p.addOptional('constr_dirs', 100);
             p.parse(varargin{:});
             
             % set up problem matrix
-            grad = double(grad);
-            grad(:, 1:3) = bsxfun(@rdivide, grad(:, 1:3), sqrt(sum(grad(:, 1:3).^2, 2))); grad(isnan(grad)) = 0;
-            A = [ones([size(grad, 1) 1], class(grad)) DTI.grad2A(grad)];
+            te = double(te);
+            A = [ones([size(te, 1) 1], class(te)) -te];
             
             % set up constraint matrix
             constr = p.Results.constr;
-            n = p.Results.constr_dirs;
             Aneq = [];
             if exist('constr', 'var') && any(constr)
-                dirs = Directions.get(n);
                 if constr(1)
-                    Aneq = [Aneq; [zeros(n, 1) DTI.grad2A(dirs)]];
+                    Aneq = [Aneq; 0 -1];
                 end
             end
             
@@ -85,76 +81,21 @@ classdef DTI < Model
     end
     
     methods (Access = private, Static = true)
-        function b0 = b0(x)
-            b0 = exp(x(1,:));
+        function rho = rho(x)
+            rho = exp(x(1,:));
         end
         
-        function fa = fa(eigval)
-            l1 = eigval(1,:); l2 = eigval(2,:); l3 = eigval(3,:);
-            fa = sqrt(1/2).*sqrt((l1-l2).^2+(l2-l3).^2+(l3-l1).^2)./sqrt(l1.^2+l2.^2+l3.^2);
-        end
-        function colfa = colfa(eigval,eigvec)
-            colfa = abs(eigvec(1:3,:)).*DTI.fa(eigval);
-        end
-        
-        function ad = ad(eigval)
-            ad = eigval(1,:);
-        end
-        
-        function rd = rd(eigval)
-            rd = mean(eigval(2:3,:),1);
-        end
-        
-        function md = md(eigval)
-            md = mean(eigval,1);
+        function t2 = t2(x)
+            t2 = 1./x(2,:);
         end
     end
     
     methods (Access = public, Static = true)
-        function v = ind()
-            v = [1 1; 1 2; 1 3; 2 2; 2 3; 3 3];
-        end
-        
-        function v = cnt()
-            v = [1 2 2 1 2 1];
-        end
-        
-        function A = grad2A(grad)
-            if size(grad,2) < 4
-                grad(:,4) = 1;
-            end
-            A = -(grad(:, 4)).*prod(reshape(grad(:,DTI.ind()),[],6,2),3)*diag(DTI.cnt());
-        end
-        
-        function [eigval, eigvec] = eig(x,k)
-            if nargin < 2
-                k = 3;
-            end
-            t = x(2:7,:);
-            eigval = zeros(k,size(t,2));
-            eigvec = zeros(3*k,size(t,2));
-            for i = 1:size(t,2)
-                ti = reshape(t([1 2 3 2 4 5 3 5 6],i), [3 3]);
-                [vec, val] = eigs(ti,k);
-                eigval(:,i) = diag(val);
-                eigvec(:,i) = vec(:);
-            end
-        end
-        
-        function adc = adc(x, dir)
-            adc = -DTI.grad2A(dir)*x(2:7,:);
-        end
-        
         function metrics = metrics(x)
-            fprintf(1, 'Calculating DTI metrics ...\n');
+            fprintf(1, 'Calculating T2 metrics ...\n');
             if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end
-            metrics.b0 = DTI.b0(x);
-            [metrics.eigval, metrics.eigvec] = DTI.eig(x);
-            metrics.ad = DTI.ad(metrics.eigval);
-            metrics.rd = DTI.rd(metrics.eigval);
-            metrics.md = DTI.md(metrics.eigval);
-            metrics.fa = DTI.fa(metrics.eigval);
-            metrics.colfa = DTI.colfa(metrics.eigval,metrics.eigvec);
+            metrics.rho = T2.rho(x);
+            metrics.t2 = DTI.t2(x);
             if exist('mask','var')
                 f = fieldnames(metrics);
                 for i = 1:size(f,1)
