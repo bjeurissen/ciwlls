@@ -16,7 +16,7 @@ end
 y = Volumes.mask(y,mask);
 
 %% fit model
-model = DKI(grad); % or model = DTI(grad); for DTI
+model = DKI(grad);
 x = model.solve(y);
 
 %% calculate scalar metrics
