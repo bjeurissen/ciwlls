@@ -1,4 +1,4 @@
-classdef DTI < Model
+classdef DTI < LogLinear
     % Authors: Ben Jeurissen (ben.jeurissen@uantwerpen.be), Jan Morez (jan.morez@uantwerpen.be)
     %
     % Basic usage:
@@ -80,7 +80,7 @@ classdef DTI < Model
             end
             
             % set up generic y = exp(A*x) problem
-            obj = obj@Model(A,Aneq,bneq,varargin{:});
+            obj = obj@LogLinear(A,Aneq,bneq,varargin{:});
         end
     end
     

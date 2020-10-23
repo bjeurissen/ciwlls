@@ -1,9 +1,9 @@
-classdef (Abstract) Model
+classdef (Abstract) LogLinear
     % Authors: Ben Jeurissen (ben.jeurissen@uantwerpen.be), Jan Morez (jan.morez@uantwerpen.be)
     %
     % Basic usage:
     %
-    % model = Model(A,Aneq,bneq,params);
+    % model = LogLinear(A,Aneq,bneq,params);
     % y = Volumes.mask(y,mask);
     % x = model.solve(y);
     % m = model.metrics(x);
@@ -59,7 +59,7 @@ classdef (Abstract) Model
     end
     
     methods (Access = public, Static = false)
-        function obj = Model(A, Aneq, bneq, varargin)
+        function obj = LogLinear(A, Aneq, bneq, varargin)
             fprintf(1, 'Setting up generic exp(A*x) model ...\n');
             obj.A = A;
             p = inputParser;
