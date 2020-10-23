@@ -1,1 +1,1 @@
-Usage: see `demo_dki.m` for a demonstration
+Usage: see `demo_{dti,dki,qti}.m` for a demonstration
