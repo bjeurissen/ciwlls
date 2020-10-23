@@ -7,7 +7,7 @@ grad = double(grad); % gradient directions and b-value
 grad(:,4) = grad(:,4)/1000; % express b-value in ms/um^2 for better conditioning
 mask = MRtrix.readToMatlab('mask.mif'); % logical processing mask
 
-%% smoothing image prior to fit can improve DKI fit
+%% smoothing image prior to fit can improve DTI fit
 for i = 1:size(y,4)
     y(:,:,:,i) = smooth3(y(:,:,:,i),'gaussian',3,0.65);
 end
