@@ -56,6 +56,7 @@ classdef NLS
         end
         
         function x = solve(obj,y,x0)
+            warning('off','MATLAB:nearlySingularMatrix');
             if nargin > 2
                 x = x0;
             else
@@ -83,6 +84,7 @@ classdef NLS
                 end
             end
             fprintf('\n');
+            warning('on','MATLAB:nearlySingularMatrix');
         end
     end
 end
