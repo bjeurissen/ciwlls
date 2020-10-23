@@ -52,6 +52,7 @@ classdef DTI
         iter
         estimatorname
         estimator
+        init_weight
         init_estimator
     end
     
@@ -61,13 +62,18 @@ classdef DTI
                 fprintf(1, 'Setting up DTI model ...\n');
                 p = inputParser;
                 p.addOptional('estimator', 'wlls');
+                p.addOptional('init_estimator', 'lls');
+                p.addOptional('init_weight','data');
                 p.addOptional('iter', 2);
                 p.addOptional('constr', 1);
                 p.addOptional('constr_dirs', 100);
                 p.parse(varargin{:});
                 
                 obj.estimatorname = p.Results.estimator;
+                obj.init_estimator = p.Results.init_estimator;
+                
                 if strcmp(obj.estimatorname, 'wlls')
+                    obj.init_weight = p.Results.init_weight;
                     obj.iter = p.Results.iter;
                 end
                 constr = p.Results.constr;
@@ -116,8 +122,14 @@ classdef DTI
                 case 'wlls'
                     fprintf(1, 'Performing WLLS fitting ...\n');
                     logy = log(y);
-                    fprintf(1, 'Initial weighting...\n');
-                    x = obj.estimator.solve(logy, y);
+                    switch obj.init_weight
+                        case 'data'
+                            fprintf(1, 'Initial weighting using data...\n');
+                            x = obj.estimator.solve(logy, y);
+                        case 'ones'
+                            fprintf(1, 'Initial weighting using ones...\n');
+                            x = obj.estimator.solve(logy, ones(size(y)));
+                    end
                     for it = 1:obj.iter
                         fprintf(1, 'Iterative reweighting #%i...\n', it);
                         x = obj.estimator.solve(logy, obj.predict(x));

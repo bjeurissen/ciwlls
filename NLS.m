@@ -67,7 +67,12 @@ classdef NLS
                     if ~mod(i,round(size(y,2)/100))
                         fprintf(1,'\b\b\b\b%3.0f%%',i/size(y,2)*100);
                     end
-                    x(:,i) = fminunc(@(x) obj.fun(x,y(:,i)),x(:,i),obj.optimopt);
+                    try
+                      x(:,i) = fminunc(@(x) obj.fun(x,y(:,i)),x(:,i),obj.optimopt);
+                    catch
+                        x(:,i) = NaN;
+                        warning('NLS:solve could not recover from NaN or Inf');
+                    end
                 end
             else
                 for i = 1:size(y,2)
