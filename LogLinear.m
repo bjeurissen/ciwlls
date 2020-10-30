@@ -63,6 +63,7 @@ classdef (Abstract) LogLinear
             fprintf(1, 'Setting up generic exp(A*x) model ...\n');
             obj.A = A;
             p = inputParser;
+            p.KeepUnmatched = true;
             p.addOptional('estimator', 'wlls');
             p.addOptional('init_estimator', 'lls');
             p.addOptional('init_weight', 'data');
