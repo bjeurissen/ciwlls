@@ -1,0 +1,2 @@
+# command_history: dirgen -cart 1 dir0001.txt  (version=3.0_RC3-1000-g3151ed7a-dirty)
+-0.880799573632501 0.421787319654971 -0.215145457928071

@@ -56,17 +56,18 @@ classdef LLS
         end
         
         function x = solve(obj,y,w)
+            p = 0;
+            D = parallel.pool.DataQueue;
+            afterEach(D, @nUpdateWaitbar);
             if nargin < 3
                 if isempty(obj.Aneq) && isempty(obj.Aeq)
                     x = obj.A\y;
                 else
                     x = zeros([size(obj.A,2) size(y,2)]);
                     fprintf(1,'Progress: %3d%%\n',0);
-                    for i = 1:size(y,2)
-                        if ~mod(i,round(size(y,2)/100))
-                            fprintf(1,'\b\b\b\b%3.0f%%',i/size(y,2)*100);
-                        end
-                        x(:,i) = quadprog(obj.H,-obj.A'*y(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt);
+                    parfor i = 1:size(y,2)
+                        x(:,i) = quadprog(obj.H,-obj.A'*y(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt); %#ok<PFBNS>
+                        send(D,i)
                     end
                     fprintf('\n');
                 end
@@ -74,18 +75,22 @@ classdef LLS
                 wy = w.*y;
                 x = zeros([size(obj.A,2) size(y,2)]);
                 fprintf(1,'Progress: %3d%%\n',0);
-                for i = 1:size(y,2)
-                    if ~mod(i,round(size(y,2)/100))
-                        fprintf(1,'\b\b\b\b%3.0f%%',i/size(y,2)*100);
-                    end
-                    wA = w(:,i).*obj.A;
+                parfor i = 1:size(y,2)
+                    wA = w(:,i).*obj.A; %#ok<PFBNS>
                     if isempty(obj.Aneq) && isempty(obj.Aeq)
                         x(:,i) = wA\wy(:,i);
                     else
                         x(:,i) = quadprog(wA'*wA,-wA'*wy(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt);
                     end
+                    send(D,i)
                 end
                 fprintf('\n');
+            end
+            function nUpdateWaitbar(~)
+                p = p + 1;
+                if ~mod(p,round(size(y,2)/100))
+                    fprintf(1,'\b\b\b\b%3.0f%%',p/size(y,2)*100);
+                end
             end
         end
     end

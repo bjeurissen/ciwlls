@@ -57,6 +57,9 @@ classdef NLS
         
         function x = solve(obj,y,x0)
             warning('off','MATLAB:nearlySingularMatrix');
+            p = 0;
+            D = parallel.pool.DataQueue;
+            afterEach(D, @nUpdateWaitbar);
             if nargin > 2
                 x = x0;
             else
@@ -64,26 +67,28 @@ classdef NLS
             end
             fprintf(1,'Progress: %3d%%\n',0);
             if isempty(obj.Aneq) && isempty(obj.Aeq)
-                for i = 1:size(y,2)
-                    if ~mod(i,round(size(y,2)/100))
-                        fprintf(1,'\b\b\b\b%3.0f%%',i/size(y,2)*100);
-                    end
+                parfor i = 1:size(y,2)
                     try
                         x(:,i) = fminunc(@(x) obj.fun(x,y(:,i)),x(:,i),obj.optimopt);
                     catch
                         x(:,i) = NaN;
                         warning('NLS:solve could not recover from NaN or Inf');
                     end
+                    send(D,i)
                 end
             else
-                for i = 1:size(y,2)
-                    if ~mod(i,round(size(y,2)/100))
-                        fprintf(1,'\b\b\b\b%3.0f%%',i/size(y,2)*100);
-                    end
+                parfor i = 1:size(y,2)
                     x(:,i) = fmincon(@(x) obj.fun(x,y(:,i)),x(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt);
+                    send(D,i)
                 end
             end
             fprintf('\n');
+            function nUpdateWaitbar(~)
+                p = p + 1;
+                if ~mod(p,round(size(y,2)/100))
+                    fprintf(1,'\b\b\b\b%3.0f%%',p/size(y,2)*100);
+                end
+            end
             warning('on','MATLAB:nearlySingularMatrix');
         end
     end
