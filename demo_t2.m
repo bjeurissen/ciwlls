@@ -15,7 +15,7 @@ end
 y = Volumes.mask(y,mask);
 
 %% fit model
-model = T2(grad);
+model = T2(te);
 x = model.solve(y);
 
 %% calculate scalar metrics
