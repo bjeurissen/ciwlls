@@ -53,6 +53,7 @@ classdef DKI < LogLinear
             
             % parse DKI specific options
             p = inputParser;
+            p.KeepUnmatched = true;
             p.addOptional('constr', [0 1 1]);
             p.addOptional('constr_dirs', 100);
             p.parse(varargin{:});
