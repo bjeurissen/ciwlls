@@ -56,6 +56,7 @@ classdef LLS
         end
         
         function x = solve(obj,y,w)
+            nvox = size(y,2);
             p = 0;
             D = parallel.pool.DataQueue;
             afterEach(D, @nUpdateWaitbar);
@@ -63,9 +64,9 @@ classdef LLS
                 if isempty(obj.Aneq) && isempty(obj.Aeq)
                     x = obj.A\y;
                 else
-                    x = zeros([size(obj.A,2) size(y,2)]);
+                    x = zeros([size(obj.A,2) nvox]);
                     fprintf(1,'Progress: %3d%%\n',0);
-                    parfor i = 1:size(y,2)
+                    parfor i = 1:nvox
                         x(:,i) = quadprog(obj.H,-obj.A'*y(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt); %#ok<PFBNS>
                         send(D,i)
                     end
@@ -73,9 +74,9 @@ classdef LLS
                 end
             else
                 wy = w.*y;
-                x = zeros([size(obj.A,2) size(y,2)]);
+                x = zeros([size(obj.A,2) nvox]);
                 fprintf(1,'Progress: %3d%%\n',0);
-                parfor i = 1:size(y,2)
+                parfor i = 1:nvox
                     wA = w(:,i).*obj.A; %#ok<PFBNS>
                     if isempty(obj.Aneq) && isempty(obj.Aeq)
                         x(:,i) = wA\wy(:,i);
@@ -88,7 +89,7 @@ classdef LLS
             end
             function nUpdateWaitbar(~)
                 p = p + 1;
-                if ~mod(p,round(size(y,2)/100))
+                if ~mod(p,round(nvox/100))
                     fprintf(1,'\b\b\b\b%3.0f%%',p/size(y,2)*100);
                 end
             end

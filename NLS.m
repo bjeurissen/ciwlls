@@ -57,17 +57,18 @@ classdef NLS
         
         function x = solve(obj,y,x0)
             warning('off','MATLAB:nearlySingularMatrix');
+            nvox = size(y,2);
             p = 0;
             D = parallel.pool.DataQueue;
             afterEach(D, @nUpdateWaitbar);
             if nargin > 2
                 x = x0;
             else
-                x = zeros([obj.fun() size(y,2)]);
+                x = zeros([obj.fun() nvox]);
             end
             fprintf(1,'Progress: %3d%%\n',0);
             if isempty(obj.Aneq) && isempty(obj.Aeq)
-                parfor i = 1:size(y,2)
+                parfor i = 1:nvox
                     try
                         x(:,i) = fminunc(@(x) obj.fun(x,y(:,i)),x(:,i),obj.optimopt);
                     catch
@@ -77,7 +78,7 @@ classdef NLS
                     send(D,i)
                 end
             else
-                parfor i = 1:size(y,2)
+                parfor i = 1:nvox
                     x(:,i) = fmincon(@(x) obj.fun(x,y(:,i)),x(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt);
                     send(D,i)
                 end
@@ -85,8 +86,8 @@ classdef NLS
             fprintf('\n');
             function nUpdateWaitbar(~)
                 p = p + 1;
-                if ~mod(p,round(size(y,2)/100))
-                    fprintf(1,'\b\b\b\b%3.0f%%',p/size(y,2)*100);
+                if ~mod(p,round(nvox/100))
+                    fprintf(1,'\b\b\b\b%3.0f%%',p/nvox*100);
                 end
             end
             warning('on','MATLAB:nearlySingularMatrix');
