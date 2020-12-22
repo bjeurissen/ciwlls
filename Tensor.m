@@ -367,7 +367,11 @@ classdef Tensor
             L = zeros(size(t_1x6,1), 3);
             for i = 1:size(t_1x6,1)
                 t_3x3 = Tensor.t_1x6_to_3x3(t_1x6(i,:));
-                L(i,:) = eigs(t_3x3);
+                if all(~isnan(t_3x3(:)))
+                    L(i,:) = eigs(t_3x3);
+                else
+                    L(i,:) = NaN(1,3);
+                end
             end
         end
         
