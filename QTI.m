@@ -79,7 +79,7 @@ classdef QTI < LogLinear
                     Aneq = [Aneq; -[zeros(n, 7) c2]];
                 end
                 if constr(3) % positive isotropic kurtosis
-                    Aneq = [Aneq; -[zeros(1, 7) E_bulk(1,:)]];
+                    Aneq = [Aneq; -[zeros(1, 7) E_bulk]];
                 end
                 if constr(4) % positive anisotropic kurtosis
                     Aneq = [Aneq; -[zeros(n, 7) c2-E_bulk]];
