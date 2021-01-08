@@ -71,19 +71,18 @@ classdef QTI < LogLinear
                 dirs = Directions.get(n);
                 c1 = Tensor.tpars_to_1x6(ones(n,1), ones(n,1), dirs); % linear
                 c2 = Tensor.t_1x6_to_1x21(c1);
-                c1__ = Tensor.tpars_to_1x6(1, 0, dirs); % spherical
-                c2__ = Tensor.t_1x6_to_1x21(c1__);
-                if constr(1) % positive diffusivity
+                E_bulk = Tensor.iso_1x21();
+                if constr(1) % positive diffusivity: 
                     Aneq = [Aneq; -[zeros(n, 1) c1 zeros(n, 21)]];
                 end
                 if constr(2) % positive kurtosis
                     Aneq = [Aneq; -[zeros(n, 7) c2]];
                 end
                 if constr(3) % positive isotropic kurtosis
-                    Aneq = [Aneq; -[zeros(1, 7) c2__(1,:)]];
+                    Aneq = [Aneq; -[zeros(1, 7) E_bulk(1,:)]];
                 end
                 if constr(4) % positive anisotropic kurtosis
-                    Aneq = [Aneq; -[zeros(n, 7) c2-c2__]];
+                    Aneq = [Aneq; -[zeros(n, 7) c2-E_bulk]];
                 end
                 if constr(5) % monotonic signal decay
                     Aneq = [Aneq; [zeros(n, 1) -c1 max(grad(:, 4))*c2]];
