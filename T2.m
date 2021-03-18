@@ -26,7 +26,7 @@ classdef T2 < LogLinear
     %    the Software, subject to the following conditions:
     %
     %    1. The above copyright notice and this permission notice shall be
-    %    included by Recipient in all copies or substantial portions of the
+    %    included by the Recipient in all copies or substantial portions of the
     %    Software.
     %
     %    2. The Software shall not be distributed to any third parties
