@@ -96,7 +96,7 @@ classdef T2 < LogLinear
             fprintf(1, 'Calculating T2 metrics ...\n');
             if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end
             metrics.rho = T2.rho(x);
-            metrics.t2 = DTI.t2(x);
+            metrics.t2 = T2.t2(x);
             if exist('mask','var')
                 f = fieldnames(metrics);
                 for i = 1:size(f,1)
