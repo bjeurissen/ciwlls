@@ -1,6 +1,6 @@
 classdef MRtrix
-    % Written by Ben Jeurissen, Visionlab, University of Antwerp
-    % and the MRtrix developers
+    % Class Wrapper written by Ben Jeurissen, Visionlab, University of Antwerp
+    % original read and write functions by the MRtrix developers (www.mrtrix.org)
     %
     
     methods (Access=public,Static=true)
@@ -193,7 +193,7 @@ classdef MRtrix
             end
             fprintf (fid, [ '\ndatatype: ' datatype ]);
             
-            if isstruct (image) && isfield (image, 'comments')
+            if isstruct (image) && isfield (image, 'comments') && ~iscell(image.comments)
                 fprintf (fid, '\ncomments: %s', image.comments);
             end
             
