@@ -156,13 +156,7 @@ classdef DTI < LogLinear
             metrics.md = DTI.md(metrics.eigval);
             metrics.fa = DTI.fa(metrics.eigval);
             metrics.colfa = DTI.colfa(metrics.eigval,metrics.eigvec);
-            if exist('mask','var')
-                f = fieldnames(metrics);
-                for i = 1:size(f,1)
-                    fn = f{i};
-                    metrics.(fn) = Volumes.unvec(metrics.(fn), mask);
-                end
-            end
+            if exist('mask','var'); metrics = Volumes.unvec_struct(metrics); end
         end
     end
 end

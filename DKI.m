@@ -133,13 +133,7 @@ classdef DKI < LogLinear
             metrics = DTI.metrics(x);
             fprintf(1, 'Calculating DKI metrics ...\n');
             [metrics.ak, metrics.rk, metrics.mk] = DKI.armk(x);
-            if exist('mask','var')
-                f = fieldnames(metrics);
-                for i = 1:size(f,1)
-                    fn = f{i};
-                    metrics.(fn) = Volumes.unvec(metrics.(fn), mask);
-                end
-            end
+            if exist('mask','var'); metrics = Volumes.unvec_struct(metrics); end
         end
     end
 end

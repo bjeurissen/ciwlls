@@ -97,13 +97,7 @@ classdef T2 < LogLinear
             if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end
             metrics.rho = T2.rho(x);
             metrics.t2 = T2.t2(x);
-            if exist('mask','var')
-                f = fieldnames(metrics);
-                for i = 1:size(f,1)
-                    fn = f{i};
-                    metrics.(fn) = Volumes.unvec(metrics.(fn), mask);
-                end
-            end
+            if exist('mask','var'); metrics = Volumes.unvec_struct(metrics); end
         end
     end
 end

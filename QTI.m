@@ -177,13 +177,7 @@ classdef QTI < LogLinear
             
             metrics.s_ = S_I';
             metrics.s_a = S_A';
-            if exist('mask','var')
-                f = fieldnames(metrics);
-                for i = 1:size(f,1)
-                    fn = f{i};
-                    metrics.(fn) = Volumes.unvec(metrics.(fn), mask);
-                end
-            end
+            if exist('mask','var'); metrics = Volumes.unvec_struct(metrics); end
         end
     end
 end

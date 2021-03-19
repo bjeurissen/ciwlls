@@ -71,6 +71,14 @@ classdef Volumes
             end
         end
         
+        function y = unvec_struct(x,mask)
+            f = fieldnames(x);
+            for i = 1:size(f,1)
+                fn = f{i};
+                y.(fn) = Volumes.unvec(x.(fn), mask);
+            end
+        end
+        
         function y = unvec0(x,mask)
             dims = [size(mask,1) size(mask,2) size(mask,3)];
             if islogical(x)
