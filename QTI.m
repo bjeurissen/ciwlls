@@ -177,7 +177,7 @@ classdef QTI < LogLinear
             
             metrics.s_ = S_I';
             metrics.s_a = S_A';
-            if exist('mask','var'); metrics = Volumes.unvec_struct(metrics); end
+            if exist('mask','var'); metrics = Volumes.unvec_struct(metrics,mask); end
         end
     end
 end
