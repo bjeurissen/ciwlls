@@ -54,7 +54,7 @@ classdef T2_test < LogLinear
             % parse T2 specific options
             p = inputParser;
             p.KeepUnmatched = true;
-            p.addOptional('constr', 1);
+            p.addOptional('constr', [1 1 1]);
             p.parse(varargin{:});
             
             % set up problem matrix
