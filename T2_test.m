@@ -59,7 +59,7 @@ classdef T2_test < LogLinear
             
             % set up problem matrix
             te = double(te);
-            A = [ones([size(te, 1) 1], class(te)) -te (-te).^2];
+            A = [ones([size(te, 1) 1], class(te)) -te (1/2)*(-te).^2];
             warning('Problem matrix not verified yet')
             
             % set up constraint matrix
@@ -70,7 +70,7 @@ classdef T2_test < LogLinear
                     Aneq = [Aneq; 0 -1 0];
                 end
                 if constr(2)
-                    Aneq = [Aneq; 0 0 -1];
+                    Aneq = [Aneq; 0 0 1];
                     warning('Second constraint not verified yet')
                 end
                 if constr(3)
@@ -91,7 +91,7 @@ classdef T2_test < LogLinear
     
     methods (Access = private, Static = true)
         function k = k(x)
-            k = x(3,:);
+            k = 2*x(3,:)./(x(2,:).^2);
             warning('New parameter not verified yet')
         end
     end
@@ -102,7 +102,7 @@ classdef T2_test < LogLinear
             if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end
             metrics.rho = T2.rho(x);
             metrics.t2 = T2.t2(x);
-            metric.k = T2.k(x);
+            metrics.k = T2_test.k(x);
             if exist('mask','var'); metrics = Volumes.unvec_struct(metrics,mask); end
         end
     end
