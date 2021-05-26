@@ -81,7 +81,12 @@ classdef LLS
                     if isempty(obj.Aneq) && isempty(obj.Aeq)
                         x(:,i) = wA\wy(:,i);
                     else
-                        x(:,i) = quadprog(wA'*wA,-wA'*wy(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt);
+                        try
+                            x(:,i) = quadprog(wA'*wA,-wA'*wy(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt);
+                        catch
+                            x(:,i) = NaN;
+                            warning('LLS:solve could not recover from NaN or Inf');
+                        end
                     end
                     send(D,i)
                 end

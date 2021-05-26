@@ -56,7 +56,7 @@ classdef Directions
         function dirs = get(n)
             fname = fullfile(mfilename('fullpath'),sprintf('dir%04i.txt',n));
             try
-                dirs = TextFile.read(fname);
+                dirs = readmatrix(fname);%TextFile.read(fname);
             catch
                 error('Number of directions not supported')
             end
