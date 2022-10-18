@@ -1,6 +1,6 @@
 Authors: Ben Jeurissen (ben.jeurissen@uantwerpen.be), Jan Morez (jan.morez@uantwerpen.be)
 
-Copyright (c) 2020 University of Antwerp
+Copyright (c) 2022 University of Antwerp
 
 Permission is hereby granted, free of charge, to any non-commercial
 entity ('Recipient') obtaining a copy of this software and associated
