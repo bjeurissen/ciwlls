@@ -1,4 +1,8 @@
 classdef Tensor
+    % 
+    % To ensure compatibility, this class contains (almost) verbatim copies of the functions in https://github.com/markus-nilsson/md-dmri/tree/master/tools/tensor_maths,
+    % which is part of the open-source multi-dimensional diffusion MRI toolbox (Nilsson et al., Proc. Intl. Soc. Mag. Reson. Med. (26), Paris, France, 2018).
+    %
     methods(Static)
         function alpha = rot_6x6(R)
             alpha = [
@@ -190,10 +194,6 @@ classdef Tensor
                 xyxy xyxz xyyz;
                 xyxz xzxz xzyz;
                 xyyz xzyz yzyz];
-            
-            % this is fishy, but probably correct given the assumptions on cross terms
-            % w = sqrt(ones(3,3)*2 + eye(3)*2);
-            % w = ones(3,3);
             
             t_6x6 = [A B; B' C];
         end
