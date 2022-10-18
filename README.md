@@ -2,7 +2,7 @@
 
 This repository contains *constrained weighted linear least squares and nonlinear solvers* for problems that can be cast as y = exp(A*x).
 
-This includes, but is not limited to, T2(\*) mapping, Diffusion Tensor Imaging, Diffusion Kurtosis Imaging, Q-space Trajectory Imaging, ...
+This includes, but is not limited to, T2(\*) mapping, Diffusion Tensor Imaging (DTI), Diffusion Kurtosis Imaging (DKI), Q-space Trajectory Imaging (QTI), ...
 
 # Usage
 
