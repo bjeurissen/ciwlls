@@ -93,7 +93,7 @@ classdef (Abstract) LogLinear
         
         function x = solve(obj, y, x0)
             if ndims(y) ~= 2; [y, mask] = Volumes.vec(y); if nargin > 2; x0 = Volumes.vec(x0,mask); end; end %#ok<*ISMAT>
-            y = double(y); x0 = double(x0);
+            y = double(y); if nargin > 2; x0 = double(x0); end
             f = 1000/median(y(:));
             y = y.*f;
             y(y<eps) = eps;
