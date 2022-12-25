@@ -46,4 +46,4 @@ m = model.metrics(x);
 
 When using the estimators in this repository, please cite the associated paper:
 
-J. Morez, F. Szczepankiewicz, A. J. den Dekker, F. Vanhevel , J. Sijbers, B. Jeurissen. Optimal experimental design and estimation for q-space trajectory imaging. *Hum. Brain Mapp.* (2022).
+J. Morez, F. Szczepankiewicz, A. J. den Dekker, F. Vanhevel , J. Sijbers, B. Jeurissen. Optimal experimental design and estimation for q-space trajectory imaging. *Hum. Brain Mapp.* doi:10.1002/hbm.26175.
