@@ -59,7 +59,7 @@ classdef (Abstract) LogLinear
     end
     
     methods (Access = public, Static = false)
-        function obj = LogLinear(A, Aneq, bneq, varargin)
+        function obj = LogLinear(A, Aneq, bneq, Aeq, beq, varargin)
             fprintf(1, 'Setting up generic exp(A*x) model ...\n');
             obj.A = A;
             p = inputParser;
@@ -80,12 +80,12 @@ classdef (Abstract) LogLinear
             
             switch obj.estimatorname
                 case 'lls'
-                    obj.estimator = LLS(obj.A, Aneq, bneq, [], []);
+                    obj.estimator = LLS(obj.A, Aneq, bneq, Aeq, beq);
                 case 'wlls'
-                    obj.estimator = LLS(obj.A, Aneq, bneq, [], []);
+                    obj.estimator = LLS(obj.A, Aneq, bneq, Aeq, beq);
                 case 'nls'
                     obj.init_estimator = LLS(obj.A, [], [], [], []);
-                    obj.estimator = NLS(@obj.ssd, Aneq, bneq, [], []);
+                    obj.estimator = NLS(@obj.ssd, Aneq, bneq, Aeq, beq);
                 otherwise
                     error('estimator not supported!')
             end

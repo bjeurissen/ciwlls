@@ -87,7 +87,7 @@ classdef DKI < LogLinear
             end
             
             % set up generic y = exp(A*x) problem
-            obj = obj@LogLinear(A,Aneq,bneq,varargin{:});
+            obj = obj@LogLinear(A,Aneq,bneq,[],[],varargin{:});
         end
     end
     

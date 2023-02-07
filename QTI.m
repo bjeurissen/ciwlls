@@ -95,8 +95,23 @@ classdef QTI < LogLinear
                 bneq = zeros(size(Aneq, 1), 1);
             end
             
+            % add equality constraints in the case of underdetermined
+            % system (e.g. LTE+STE only)
+            Aeq = [];
+            beq = [];
+            if rank(A'*A) < 28
+                disp('WARNING: Not enough information to estimate full QTI model (e.g. LTE+STE only). Estimating only 16 out of 21 4-th order parameters...')
+                Aeq = zeros(5,28);
+                Aeq(1,12) = 1;
+                Aeq(2,13) = 1;
+                Aeq(3,14) = 1;
+                Aeq(4,15) = 1;
+                Aeq(5,16) = 1;
+                beq = zeros(5,1);
+            end
+            
             % set up generic y = exp(A*x) problem
-            obj = obj@LogLinear(A,Aneq,bneq,varargin{:});
+            obj = obj@LogLinear(A,Aneq,bneq,Aeq,beq,varargin{:});
         end
     end
     
