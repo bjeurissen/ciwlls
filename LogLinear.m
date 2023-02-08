@@ -48,7 +48,7 @@ classdef (Abstract) LogLinear
     %    5. Prior to publication of research involving the Software, the
     %    Recipient shall inform the Authors listed above.
     %
-    
+
     properties (Access = public, Constant = false)
         A
         iter
@@ -57,9 +57,9 @@ classdef (Abstract) LogLinear
         init_weight
         init_estimator
     end
-    
+
     methods (Access = public, Static = false)
-        function obj = LogLinear(A, Aneq, bneq, varargin)
+        function obj = LogLinear(A, Aneq, bneq, Aeq, beq, varargin)
             fprintf(1, 'Setting up generic exp(A*x) model ...\n');
             obj.A = A;
             p = inputParser;
@@ -69,28 +69,28 @@ classdef (Abstract) LogLinear
             p.addOptional('init_weight', 'data');
             p.addOptional('iter', 2);
             p.parse(varargin{:});
-            
+
             obj.estimatorname = p.Results.estimator;
             obj.init_estimator = p.Results.init_estimator;
-            
+
             if strcmp(obj.estimatorname, 'wlls')
                 obj.init_weight = p.Results.init_weight;
                 obj.iter = p.Results.iter;
             end
-            
+
             switch obj.estimatorname
                 case 'lls'
-                    obj.estimator = LLS(obj.A, Aneq, bneq, [], []);
+                    obj.estimator = LLS(obj.A, Aneq, bneq, Aeq, beq);
                 case 'wlls'
-                    obj.estimator = LLS(obj.A, Aneq, bneq, [], []);
+                    obj.estimator = LLS(obj.A, Aneq, bneq, Aeq, beq);
                 case 'nls'
-                    obj.init_estimator = LLS(obj.A, [], [], [], []);
-                    obj.estimator = NLS(@obj.ssd, Aneq, bneq, [], []);
+                    obj.init_estimator = LLS(obj.A, [], [], Aeq, beq);
+                    obj.estimator = NLS(@obj.ssd, Aneq, bneq, Aeq, beq);
                 otherwise
                     error('estimator not supported!')
             end
         end
-        
+
         function x = solve(obj, y, x0)
             if ndims(y) ~= 2; [y, mask] = Volumes.vec(y); if nargin > 2; x0 = Volumes.vec(x0,mask); end; end %#ok<*ISMAT>
             y = double(y); if nargin > 2; x0 = double(x0); end
@@ -131,13 +131,13 @@ classdef (Abstract) LogLinear
             x(1, :) = x(1, :) - log(f);
             if exist('mask','var'); x = Volumes.unvec(x, mask); end
         end
-        
+
         function y = predict(obj, x)
             if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end
             y = exp(obj.A*x);
             if exist('mask','var'); y = Volumes.unvec(y, mask); end
         end
-        
+
         function [f, g] = ssd(obj, x, y)
             if nargin == 1
                 f = size(obj.A,2);

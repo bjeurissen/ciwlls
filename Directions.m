@@ -31,20 +31,20 @@ classdef Directions
     %    5. Before publication by Recipient of research involving the Software
     %    shall contact the authors listed above.
     %
-    
+
     methods (Access = public, Static = true)
         function S = c2s(C)
             r = sqrt(sum(C.^2, 2));
             S(:,1) = atan2(C(:,2), C(:,1));
             S(:,2) = acos(C(:,3)./r);
         end
-        
+
         function C = s2c(S)
             C = [ sin(S(:,2)).*cos(S(:,1)), ...
                 sin(S(:,2)).*sin(S(:,1)), ...
                 cos(S(:,2)) ];
         end
-        
+
         function p = equatorpoints(d, k)
             dt = pi/k;
             theta = 0:dt:(pi-dt);
@@ -52,7 +52,7 @@ classdef Directions
             R = vrrotvec2mat(vrrotvec([0 0 1],d));
             p = R*p;
         end
-        
+
         function dirs = get(n)
             fname = fullfile(mfilename('fullpath'),sprintf('dir%04i.txt',n));
             try

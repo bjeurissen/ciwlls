@@ -31,7 +31,7 @@ classdef LLS
     %    5. Prior to publication of research involving the Software, the
     %    Recipient shall inform the Authors listed above.
     %
-    
+
     properties
         A
         Aneq
@@ -41,7 +41,7 @@ classdef LLS
         optimopt
         H
     end
-    
+
     methods
         function obj = LLS(A,Aneq,bneq,Aeq,beq)
             obj.A = A;
@@ -54,7 +54,7 @@ classdef LLS
                 obj.optimopt = optimoptions('quadprog','Display','none','LinearSolver','sparse','MaxIterations',400,'OptimalityTolerance',1e-8,'StepTolerance',1e-12,'ConstraintTolerance',1e-8);
             end
         end
-        
+
         function x = solve(obj,y,w)
             nvox = size(y,2);
             p = 0;
@@ -68,7 +68,7 @@ classdef LLS
                     fprintf(1,'Progress: %3d%%\n',0);
                     parfor i = 1:nvox
                         x(:,i) = quadprog(obj.H,-obj.A'*y(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt); %#ok<PFBNS>
-                        send(D,i)
+                        send(D,i);
                     end
                     fprintf('\n');
                 end
@@ -81,9 +81,12 @@ classdef LLS
                     if isempty(obj.Aneq) && isempty(obj.Aeq)
                         x(:,i) = wA\wy(:,i);
                     else
-                        x(:,i) = quadprog(wA'*wA,-wA'*wy(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt);
+                        H=wA'*wA; %#ok<PROPLC>
+                        if all(isfinite(H),'all') && issymmetric(H) %#ok<PROPLC>
+                            x(:,i) = quadprog(H,-wA'*wy(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt); %#ok<PROPLC>
+                        end
                     end
-                    send(D,i)
+                    send(D,i);
                 end
                 fprintf('\n');
             end

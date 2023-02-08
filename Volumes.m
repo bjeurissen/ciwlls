@@ -31,7 +31,7 @@ classdef Volumes
     %    5. Prior to publication of research involving the Software, the
     %    Recipient shall inform the Authors listed above.
     %
-    
+
     methods (Access=public,Static=true)
         function [y, mask] = vec(x,mask)
             if ~exist('mask','var')
@@ -47,7 +47,7 @@ classdef Volumes
                 y(k,:) = Dummy(mask(:));
             end
         end
-        
+
         function y = unvec(x,mask)
             dims = [size(mask,1) size(mask,2) size(mask,3)];
             if isfloat(x)
@@ -57,7 +57,7 @@ classdef Volumes
             else
                 y = zeros([dims(1) dims(2) dims(3) size(x,1)], class(x));
             end
-            
+
             for k = 1:size(x,1)
                 if isfloat(x)
                     Dummy = NaN(dims, class(x));
@@ -70,7 +70,7 @@ classdef Volumes
                 y(:,:,:,k) = Dummy;
             end
         end
-        
+
         function y = unvec_struct(x,mask)
             f = fieldnames(x);
             for i = 1:size(f,1)
@@ -78,7 +78,7 @@ classdef Volumes
                 y.(fn) = Volumes.unvec(x.(fn), mask);
             end
         end
-        
+
         function y = unvec0(x,mask)
             dims = [size(mask,1) size(mask,2) size(mask,3)];
             if islogical(x)
@@ -86,7 +86,7 @@ classdef Volumes
             else
                 y = zeros([dims(1) dims(2) dims(3) size(x,1)], class(x));
             end
-            
+
             for k = 1:size(x,1)
                 if islogical(x)
                     Dummy = false(dims, class(x));
@@ -97,7 +97,7 @@ classdef Volumes
                 y(:,:,:,k) = Dummy;
             end
         end
-        
+
         function y = mask(x,mask)
             y = x;
             nanmask = ~mask & true([1 1 1 size(y,4)]);

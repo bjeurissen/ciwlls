@@ -46,55 +46,56 @@ classdef T2 < LogLinear
     %    5. Prior to publication of research involving the Software, the
     %    Recipient shall inform the Authors listed above.
     %
-    
+
     methods (Access = public, Static = false)
         function obj = T2(te, varargin)
             fprintf(1, 'Setting up T2 model ...\n');
-            
+
             % parse T2 specific options
             p = inputParser;
             p.KeepUnmatched = true;
             p.addOptional('constr', 1);
             p.parse(varargin{:});
-            
+
             % set up problem matrix
             te = double(te);
             A = [ones([size(te, 1) 1], class(te)) -te];
-            
+
             % set up constraint matrix
             constr = p.Results.constr;
             Aneq = [];
             if exist('constr', 'var') && any(constr)
                 if constr(1)
+                    disp('Constraining to non-negative T2')
                     Aneq = [Aneq; 0 -1];
                 end
             end
-            
+
             % set up constraint vector
             bneq = [];
             if size(Aneq, 1) > 0
                 bneq = zeros(size(Aneq, 1), 1);
             end
-            
+
             % set up generic y = exp(A*x) problem
-            obj = obj@LogLinear(A,Aneq,bneq,varargin{:});
+            obj = obj@LogLinear(A,Aneq,bneq,[],[],varargin{:});
         end
     end
-    
+
     methods (Access = private, Static = true)
         function rho = rho(x)
             rho = exp(x(1,:));
         end
-        
+
         function t2 = t2(x)
             t2 = 1./x(2,:);
         end
     end
-    
+
     methods (Access = public, Static = true)
         function metrics = metrics(x)
             fprintf(1, 'Calculating T2 metrics ...\n');
-            if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end
+            if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end %#ok<ISMAT>
             metrics.rho = T2.rho(x);
             metrics.t2 = T2.t2(x);
             if exist('mask','var'); metrics = Volumes.unvec_struct(metrics,mask); end
