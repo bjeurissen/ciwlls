@@ -56,7 +56,6 @@ classdef NLS
         end
 
         function x = solve(obj,y,x0)
-            warning('off','MATLAB:nearlySingularMatrix');
             nvox = size(y,2);
             p = 0;
             D = parallel.pool.DataQueue;
@@ -70,7 +69,9 @@ classdef NLS
             if isempty(obj.Aneq) && isempty(obj.Aeq)
                 parfor i = 1:nvox
                     try
+                        warning('off','MATLAB:nearlySingularMatrix');
                         x(:,i) = fminunc(@(x) obj.fun(x,y(:,i)),x(:,i),obj.optimopt); %#ok<PFBNS>
+                        warning('on','MATLAB:nearlySingularMatrix');
                     catch
                         x(:,i) = NaN;
                         warning('NLS:solve could not recover from NaN or Inf');
@@ -79,7 +80,9 @@ classdef NLS
                 end
             else
                 parfor i = 1:nvox
+                    warning('off','MATLAB:nearlySingularMatrix');
                     x(:,i) = fmincon(@(x) obj.fun(x,y(:,i)),x(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt); %#ok<PFBNS>
+                    warning('on','MATLAB:nearlySingularMatrix');
                     send(D,i)
                 end
             end
@@ -90,7 +93,6 @@ classdef NLS
                     fprintf(1,'\b\b\b\b%3.0f%%',p/nvox*100);
                 end
             end
-            warning('on','MATLAB:nearlySingularMatrix');
         end
     end
 end

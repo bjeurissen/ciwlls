@@ -84,7 +84,7 @@ classdef (Abstract) LogLinear
                 case 'wlls'
                     obj.estimator = LLS(obj.A, Aneq, bneq, Aeq, beq);
                 case 'nls'
-                    obj.init_estimator = LLS(obj.A, [], [], [], []);
+                    obj.init_estimator = LLS(obj.A, [], [], Aeq, beq);
                     obj.estimator = NLS(@obj.ssd, Aneq, bneq, Aeq, beq);
                 otherwise
                     error('estimator not supported!')
