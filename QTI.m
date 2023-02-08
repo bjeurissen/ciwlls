@@ -46,23 +46,24 @@ classdef QTI < LogLinear
     %    5. Prior to publication of research involving the Software, the
     %    Recipient shall inform the Authors listed above.
     %
-    
+
     methods (Access = public, Static = false)
         function obj = QTI(grad, varargin)
             fprintf(1, 'Setting up QTI model...\n');
-            
+
             % parse QTI specifc options
             p = inputParser;
             p.KeepUnmatched = true;
             p.addOptional('constr', [0 0 1 1 1]);
             p.addOptional('constr_dirs', 100);
+            p.addOptional('subspace_estimation', false);
             p.parse(varargin{:});
-            
+
             % set up problem matrix
             grad = double(grad);
             grad(:, 1:3) = bsxfun(@rdivide, grad(:, 1:3), sqrt(sum(grad(:, 1:3).^2, 2))); grad(isnan(grad)) = 0;
             A = [ones([size(grad, 1) 1], class(grad)) -Tensor.tpars_to_1x6(grad(:,4), grad(:,5), grad(:,1:3)) 0.5*Tensor.t_1x6_to_1x21(Tensor.tpars_to_1x6(grad(:,4), grad(:,5), grad(:,1:3)))];
-            
+
             % set up constraint matrix
             constr = p.Results.constr;
             n = p.Results.constr_dirs;
@@ -72,35 +73,38 @@ classdef QTI < LogLinear
                 c1 = Tensor.tpars_to_1x6(ones(n,1), ones(n,1), dirs); % linear
                 c2 = Tensor.t_1x6_to_1x21(c1);
                 E_bulk = Tensor.iso_1x21();
-                if constr(1) % positive diffusivity: 
+                if constr(1)
+                    disp('Constraining to non-negative diffusivity')
                     Aneq = [Aneq; -[zeros(n, 1) c1 zeros(n, 21)]];
                 end
-                if constr(2) % positive kurtosis
+                if constr(2)
+                    disp('Constraining to non-negative total kurtosis')
                     Aneq = [Aneq; -[zeros(n, 7) c2]];
                 end
-                if constr(3) % positive isotropic kurtosis
+                if constr(3)
+                    disp('Constraining to non-negative isotropic kurtosis')
                     Aneq = [Aneq; -[zeros(1, 7) E_bulk]];
                 end
-                if constr(4) % positive anisotropic kurtosis
+                if constr(4)
+                    disp('Constraining to non-negative anisotropic kurtosis')
                     Aneq = [Aneq; -[zeros(n, 7) c2-E_bulk]];
                 end
-                if constr(5) % monotonic signal decay
+                if constr(5)
+                    disp('Constraining to monotonic signal decay')
                     Aneq = [Aneq; [zeros(n, 1) -c1 max(grad(:, 4))*c2]];
                 end
             end
-            
+
             % set up constraint vector
             bneq = [];
             if size(Aneq, 1) > 0
                 bneq = zeros(size(Aneq, 1), 1);
             end
-            
-            % add equality constraints in the case of underdetermined
-            % system (e.g. LTE+STE only)
-            Aeq = [];
-            beq = [];
-            if rank(A'*A) < 28
-                disp('WARNING: Not enough information to estimate full QTI model (e.g. LTE+STE only). Estimating only 16 out of 21 4-th order parameters...')
+
+            % add equality constraints if subspace_estimation is true (needed to support LTE+STE only data)
+            Aeq = []; beq = [];
+            if p.Results.subspace_estimation
+                disp('Constraining parameters 12,13,14,15, and 16 to zero.');
                 Aeq = zeros(5,28);
                 Aeq(1,12) = 1;
                 Aeq(2,13) = 1;
@@ -109,15 +113,30 @@ classdef QTI < LogLinear
                 Aeq(5,16) = 1;
                 beq = zeros(5,1);
             end
-            
+
+            r = rank(A,1e-10);
+            if r < size(A,2)
+                if r >= 23
+                    if ~p.Results.subspace_estimation
+                        error('A in exp(A*x) is not full rank. Use "QTI(..., ''subspace_estimation'', true)" to support LTE+STE only data.')
+                    end
+                else
+                    error('A in exp(A*x) is not full rank.');
+                end
+            else
+                if p.Results.subspace_estimation
+                    disp('WARNING: Constraining parameters 12,13,14,15, and 16 to zero, despite full rank A.');
+                end
+            end
+
             % set up generic y = exp(A*x) problem
             obj = obj@LogLinear(A,Aneq,bneq,Aeq,beq,varargin{:});
         end
     end
-    
+
     methods (Access = public, Static = true)
         function metrics = metrics(x)
-            if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end
+            if ndims(x) ~= 2; [x, mask] = Volumes.vec(x); end %#ok<ISMAT>
             fprintf(1, 'Calculating QTI metrics ...\n');
             dt_1x6 = x(2:7,:)';
             B0 = exp(x(1,:));
@@ -126,28 +145,28 @@ classdef QTI < LogLinear
             L = Tensor.eigval(dt_1x6);
             AD = real(L(:,1));
             RD = mean(real(L(:,2:3)),2);
-            
+
             dt2_1x21 = Tensor.t_1x6_to_1x21(dt_1x6);
             ct_1x21 = x(8:28,:)';
             [E_bulk, E_shear, E_iso] = Tensor.iso_1x21();
-            
+
             V_MD2    = Tensor.inner(dt2_1x21, E_bulk);
             V_shear2 = Tensor.inner(dt2_1x21, E_shear);
             V_iso2   = Tensor.inner(dt2_1x21, E_iso);
-            
+
             V_MD     = Tensor.inner(ct_1x21 , E_bulk);
             V_shear  = Tensor.inner(ct_1x21 , E_shear);
             V_iso    = Tensor.inner(ct_1x21 , E_iso);
-            
+
             V_MD1    = V_MD    + V_MD2;
             V_shear1 = V_shear + V_shear2;
             V_iso1   = V_iso   + V_iso2;
-            
+
             C_MD =       V_MD     ./ V_MD1;
             C_mu = 1.5 * V_shear1 ./ V_iso1;
             C_M  = 1.5 * V_shear2 ./ V_iso2;
             C_c  =            C_M ./ C_mu;
-            
+
             MKi  = 3 * V_MD ./ V_MD2;
             MKa  = (6/5) * V_shear1 ./ V_MD2;
             MKad = (6/5) * V_shear  ./ V_MD2;
@@ -155,33 +174,33 @@ classdef QTI < LogLinear
             MK   = MKad + MKi;
             MKd  = MKa - MKad;
             uFA  = sqrt(C_mu);
-            
+
             S_I = sqrt(V_MD.*(V_MD > 0));
             S_A = sqrt(V_shear1.*(V_shear1 > 0));
-            
+
             metrics.b0 = B0;
             metrics.fa = FA';
             metrics.md = MD';
             metrics.ad = AD';
             metrics.rd = RD';
-            
+
             metrics.v_md2 = V_MD2';
             metrics.v_shear2 = V_shear2';
             metrics.v_iso2 = V_iso2';
-            
+
             metrics.v_md = V_MD';
             metrics.v_shear = V_shear';
             metrics.v_iso = V_iso';
-            
+
             metrics.v_md1 = V_MD1';
             metrics.v_shear1 = V_shear1';
             metrics.v_iso1 = V_iso1';
-            
+
             metrics.c_md = C_MD';
             metrics.c_mu = C_mu';
             metrics.c_m = C_M';
             metrics.c_c = C_c';
-            
+
             metrics.mki = MKi';
             metrics.mka = MKa';
             metrics.mkad = MKad';
@@ -189,8 +208,8 @@ classdef QTI < LogLinear
             metrics.mk = MK';
             metrics.mkd = MKd';
             metrics.ufa = uFA';
-            
-            metrics.s_ = S_I';
+
+            metrics.s_i = S_I';
             metrics.s_a = S_A';
             if exist('mask','var'); metrics = Volumes.unvec_struct(metrics,mask); end
         end

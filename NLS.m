@@ -31,7 +31,7 @@ classdef NLS
     %    5. Prior to publication of research involving the Software, the
     %    Recipient shall inform the Authors listed above.
     %
-    
+
     properties
         fun
         Aneq
@@ -40,7 +40,7 @@ classdef NLS
         beq
         optimopt
     end
-    
+
     methods
         function obj = NLS(fun,Aneq,bneq,Aeq,beq)
             obj.fun = fun;
@@ -54,7 +54,7 @@ classdef NLS
                 obj.optimopt = optimoptions('fmincon','Display','none','SpecifyObjectiveGradient',true,'MaxIterations',400,'MaxFunctionEvaluations',inf,'OptimalityTolerance',1e-8,'StepTolerance',1e-12,'ConstraintTolerance',1e-8);
             end
         end
-        
+
         function x = solve(obj,y,x0)
             warning('off','MATLAB:nearlySingularMatrix');
             nvox = size(y,2);
@@ -70,7 +70,7 @@ classdef NLS
             if isempty(obj.Aneq) && isempty(obj.Aeq)
                 parfor i = 1:nvox
                     try
-                        x(:,i) = fminunc(@(x) obj.fun(x,y(:,i)),x(:,i),obj.optimopt);
+                        x(:,i) = fminunc(@(x) obj.fun(x,y(:,i)),x(:,i),obj.optimopt); %#ok<PFBNS>
                     catch
                         x(:,i) = NaN;
                         warning('NLS:solve could not recover from NaN or Inf');
@@ -79,7 +79,7 @@ classdef NLS
                 end
             else
                 parfor i = 1:nvox
-                    x(:,i) = fmincon(@(x) obj.fun(x,y(:,i)),x(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt);
+                    x(:,i) = fmincon(@(x) obj.fun(x,y(:,i)),x(:,i),obj.Aneq,obj.bneq,obj.Aeq,obj.beq,[],[],[],obj.optimopt); %#ok<PFBNS>
                     send(D,i)
                 end
             end

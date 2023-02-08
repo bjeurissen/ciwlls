@@ -35,7 +35,7 @@ classdef TextFile
     %    5. Prior to publication of research involving the Software, the
     %    Recipient shall inform the Authors listed above.
     %
-    
+
     methods (Access = public, Static = true)
         function A = read(filename)
             opts = detectImportOptions(filename,'CommentStyle','#','ReadVariableNames',false,'ReadRowNames',false);
