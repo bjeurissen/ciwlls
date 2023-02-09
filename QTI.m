@@ -105,6 +105,7 @@ classdef QTI < LogLinear
             Aeq = []; beq = [];
             if p.Results.rank23
                 disp('Constraining parameters 12,13,14,15, and 16 to zero.');
+                error('Currently the rank23 option is not supported... Please wait for an update....')
                 Aeq = zeros(5,28);
                 Aeq(1,12) = 1;
                 Aeq(2,13) = 1;
