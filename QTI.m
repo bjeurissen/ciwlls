@@ -56,7 +56,7 @@ classdef QTI < LogLinear
             p.KeepUnmatched = true;
             p.addOptional('constr', [0 0 1 1 1]);
             p.addOptional('constr_dirs', 100);
-            p.addOptional('subspace_estimation', false);
+            p.addOptional('rank23', false);
             p.parse(varargin{:});
 
             % set up problem matrix
@@ -101,9 +101,9 @@ classdef QTI < LogLinear
                 bneq = zeros(size(Aneq, 1), 1);
             end
 
-            % add equality constraints if subspace_estimation is true (needed to support LTE+STE only data)
+            % add equality constraints if rank23 is true (needed to support LTE+STE only data)
             Aeq = []; beq = [];
-            if p.Results.subspace_estimation
+            if p.Results.rank23
                 disp('Constraining parameters 12,13,14,15, and 16 to zero.');
                 Aeq = zeros(5,28);
                 Aeq(1,12) = 1;
@@ -117,14 +117,14 @@ classdef QTI < LogLinear
             r = rank(A,1e-10);
             if r < size(A,2)
                 if r >= 23
-                    if ~p.Results.subspace_estimation
-                        error('A in exp(A*x) is not full rank. Use "QTI(..., ''subspace_estimation'', true)" to support LTE+STE only data.')
+                    if ~p.Results.rank23
+                        error('A in exp(A*x) is not full rank. Use "QTI(..., ''rank23'', true)" to support LTE+STE only data.')
                     end
                 else
                     error('A in exp(A*x) is not full rank.');
                 end
             else
-                if p.Results.subspace_estimation
+                if p.Results.rank23
                     disp('WARNING: Constraining parameters 12,13,14,15, and 16 to zero, despite full rank A.');
                 end
             end
