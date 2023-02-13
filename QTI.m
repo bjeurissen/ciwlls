@@ -56,13 +56,41 @@ classdef QTI < LogLinear
             p.KeepUnmatched = true;
             p.addOptional('constr', [0 0 1 1 1]);
             p.addOptional('constr_dirs', 100);
-            p.addOptional('rank23', false);
+            p.addOptional('rank_fix', 'eq_constr', @(input) strcmp(input,'eq_constr') | strcmp(input,'ste_offset'));
             p.parse(varargin{:});
 
             % set up problem matrix
             grad = double(grad);
             grad(:, 1:3) = bsxfun(@rdivide, grad(:, 1:3), sqrt(sum(grad(:, 1:3).^2, 2))); grad(isnan(grad)) = 0;
             A = [ones([size(grad, 1) 1], class(grad)) -Tensor.tpars_to_1x6(grad(:,4), grad(:,5), grad(:,1:3)) 0.5*Tensor.t_1x6_to_1x21(Tensor.tpars_to_1x6(grad(:,4), grad(:,5), grad(:,1:3)))];
+ 
+            Aeq = []; beq = [];
+            if rank(A) < 28
+                if rank(A) == 23
+                    switch p.Results.rank_fix
+                        case 'eq_constr'
+                            disp('WARNING: Using equality constraints to deal with rank deficiency of A in exp(A*x). Expected when fitting to LTE+STE only data.')
+                            Aeq = zeros(5,28);
+                            Aeq(1,12) = 1;
+                            Aeq(2,13) = 1;
+                            Aeq(3,14) = 1;
+                            Aeq(4,15) = 1;
+                            Aeq(5,16) = 1;
+                            beq = zeros(5,1);
+                        case 'ste_offset'
+                            disp('WARNING: Adding small offset to b_delta of STE samples to increase rank of A in exp(A*x). Expected when fitting to LTE+STE only data.')
+                            my_eps = 1e-4;
+                            b_delta = grad(:,5); b_delta(b_delta >= 0 & b_delta < my_eps) = my_eps; b_delta(b_delta <= 0 & b_delta > -my_eps) = -my_eps;
+                            A = [ones([size(grad, 1) 1], class(grad)) -Tensor.tpars_to_1x6(grad(:,4), grad(:,5), grad(:,1:3)) 0.5*Tensor.t_1x6_to_1x21(Tensor.tpars_to_1x6(grad(:,4), b_delta, grad(:,1:3)))];
+                            if rank(A) < 28
+                                error('A in exp(A*x) is not full rank. Make sure your acquisiton contains multiple b-values and b-tensor shapes.');
+                            end
+                        otherwise
+                    end
+                else
+                    error('A in exp(A*x) is not full rank. Make sure your acquisiton contains multiple b-values and b-tensor shapes.');
+                end
+            end
 
             % set up constraint matrix
             constr = p.Results.constr;
@@ -99,35 +127,6 @@ classdef QTI < LogLinear
             bneq = [];
             if size(Aneq, 1) > 0
                 bneq = zeros(size(Aneq, 1), 1);
-            end
-
-            % add equality constraints if rank23 is true (needed to support LTE+STE only data)
-            Aeq = []; beq = [];
-            if p.Results.rank23
-                disp('Constraining parameters 12,13,14,15, and 16 to zero.');
-                error('Currently the rank23 option is not supported... Please wait for an update....')
-                Aeq = zeros(5,28);
-                Aeq(1,12) = 1;
-                Aeq(2,13) = 1;
-                Aeq(3,14) = 1;
-                Aeq(4,15) = 1;
-                Aeq(5,16) = 1;
-                beq = zeros(5,1);
-            end
-
-            r = rank(A,1e-10);
-            if r < size(A,2)
-                if r >= 23
-                    if ~p.Results.rank23
-                        error('A in exp(A*x) is not full rank. Use "QTI(..., ''rank23'', true)" to support LTE+STE only data.')
-                    end
-                else
-                    error('A in exp(A*x) is not full rank.');
-                end
-            else
-                if p.Results.rank23
-                    disp('WARNING: Constraining parameters 12,13,14,15, and 16 to zero, despite full rank A.');
-                end
             end
 
             % set up generic y = exp(A*x) problem
