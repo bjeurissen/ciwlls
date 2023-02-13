@@ -31,7 +31,6 @@ Note that the above constructor creates a model instance backed by a constrained
 * to set the type of initialization for WLLS weights (log of the raw data (data) or unweighted (ones)):  <pre><code>'init_weight', 'data/<b>ones</b>'</code></pre>
 * to set the number of iterative reweightings for WLLS: <pre><code>'iter', <b>2</b></code></pre>
 * to modify the constraints that are enforced (non-neg diffusivity, non-neg total kurtosis, non-neg isotropic kurtosis, non-neg anisotropic kurtosis, monotonic signal decay): <pre><code>'constraints', [<b>0 0 1 1 1</b>]</code></pre> Note that the vector of supported constraints will depend on the specific model, please consult ``<Modelname>.m`` to obtain a models-specific list.
-* to toggle estimating a simplified QTI model (23 instead of 28 parameters): <pre><code>'rank23', <b>false</b></code></pre> **Note that this has to be set to 'true' in the case of LTE+STE only data** (you should receive an error with instructions if you fail to do so).
 
 5. Fitting your model:
 ```matlab
